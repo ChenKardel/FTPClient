@@ -8,3 +8,5 @@ C:\Users\11145\source\repos\Ftp\Test\obj\Debug\Test.csproj.CoreCompileInputs.cac
 C:\Users\11145\source\repos\Ftp\Test\obj\Debug\Test.csproj.CopyComplete
 C:\Users\11145\source\repos\Ftp\Test\obj\Debug\Test.exe
 C:\Users\11145\source\repos\Ftp\Test\obj\Debug\Test.pdb
+C:\Users\11145\source\repos\Ftp\Test\bin\Debug\Newtonsoft.Json.dll
+C:\Users\11145\source\repos\Ftp\Test\bin\Debug\Newtonsoft.Json.xml

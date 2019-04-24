@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Ftp.entity;
 using Ftp.@enum;
 using Ftp.@interface;
 //using Action = System.Action;
@@ -25,7 +26,9 @@ namespace Ftp
         private string _password;
         private string _hostname;
         private int _port;
-        private Socket _socket;
+        private Socket _mainSocket;
+        private Socket _listeningSocket;
+        private Socket _dataSocket;
         private int _timeout;
         private bool _isAnonymous = true;
         #endregion
@@ -45,7 +48,7 @@ namespace Ftp
             _hostname = hostname;
             _port = port;
             _timeout = timeout;
-            _socket = Connect(hostname, port, username, password,timeout);
+            _mainSocket = Connect(hostname, port, username, password,timeout);
         }
 
      
@@ -67,11 +70,9 @@ namespace Ftp
             IPAddress ipAddress = isMatch ? IPAddress.Parse(host) : Dns.GetHostAddresses(host)[0];
             socket.Connect(ipAddress, port);
             WaitReceive(socket);
-            var userCmd = Actions.User(username);
-            socket.Send(EncodingUtf8(userCmd));
+            socket.Send(EncodingUtf8(Actions.User(username)));
             WaitReceive(socket);
-            var pwdCmd = Actions.Password(password);
-            socket.Send(EncodingUtf8(pwdCmd));
+            socket.Send(EncodingUtf8(Actions.Password(password)));
             WaitReceive(socket);
             socket.Send(EncodingUtf8(Actions.Passsive()));
             var receiveMsg = WaitReceive(socket);
@@ -83,19 +84,9 @@ namespace Ftp
                 var passive = receiveMsg.Substring(leftPar, rightPar - leftPar).Split(',');
                 var server = passive[0] + "." + passive[1] + "." + passive[2] + "." + passive[3];
                 port = (int.Parse(passive[4]) << 8) + int.Parse(passive[5]);
-
-//
-//                if (socket.Connected)
-//                {
-//                    socket.Close();
-//                }
-//                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-//                {
-//                    ReceiveTimeout = timeout,
-//                    SendTimeout = timeout
-//                };
-//                socket.Connect(server, port);
-//                Debug.WriteLine(WaitReceive(socket));
+                CloseDataSocket();
+                _dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _dataSocket.Connect(server, port);
             }
             else
             {
@@ -130,17 +121,29 @@ namespace Ftp
             throw new NotImplementedException();
         }
 
-        public List<VisualFile> ListRemoteFiles()
-        {
-            return ListRemoteFiles(".");
-        }
-
         public List<VisualFile> ListRemoteFiles(string dirname)
         {
-            Debug.WriteLine(Actions.NList("data"));
-            _socket.Send(EncodingUtf8(Actions.NList("data")));
-            Debug.WriteLine(WaitReceive(_socket));
+            Debug.WriteLine(Actions.NList(dirname));
+//            Debug.WriteLine(Actions.List(dirname));
+            _mainSocket.Send(EncodingUtf8(Actions.NList(dirname)));
+            Debug.WriteLine(WaitReceive(_mainSocket));
+            
             return null;
+        }
+        public List<VisualFile> ListRemoteFiles()
+        {
+            Debug.WriteLine(Actions.List());
+//            Debug.WriteLine(Actions.List(dirname));
+            _mainSocket.Send(EncodingUtf8(Actions.List()));
+            Debug.WriteLine(WaitReceive(_mainSocket));
+            var waitReceive = WaitReceive(_dataSocket);
+            Debug.WriteLine(waitReceive);
+            var files = VisualFileConverter.ConvertTextToVisualFiles(waitReceive);
+            foreach (var visualFile in files)
+            {
+                Debug.WriteLine(visualFile);
+            }
+            return files.ToList();
         }
 
         public List<VisualFile> ListLocalFiles()
@@ -153,9 +156,19 @@ namespace Ftp
             throw new NotImplementedException();
         }
 
-        public Socket Disconnect()
+        public void Close()
         {
             throw new NotImplementedException();
+        }
+
+        public void CloseDataSocket()
+        {
+            if (_dataSocket != null && _dataSocket.Connected)
+            {
+                _dataSocket.Close();
+            }
+
+            _dataSocket = null;
         }
 
         #endregion

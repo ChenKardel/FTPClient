@@ -52,6 +52,10 @@ namespace Ftp.@enum
         {
             return "LIST " + name + "\r\n";
         }
+   public static string List()
+        {
+            return "LIST\r\n";
+        }
 
         internal enum ModeType
         {

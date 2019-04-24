@@ -18,6 +18,7 @@ namespace Ftp.@interface
         List<VisualFile> ListRemoteFiles(string dirname);
         List<VisualFile> ListLocalFiles();
         List<VisualFile> ListLocalFiles(string dirname);
-        Socket Disconnect();
+        void Close();
+        void CloseDataSocket();
     }
 }
