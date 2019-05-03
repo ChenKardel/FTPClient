@@ -15,9 +15,9 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            var ftpConnector = new FtpConnector("39.106.225.117", "cjj123", "cjj123");
-            List<VisualFile> listRemoteFiles = ftpConnector.ListRemoteFiles();
 
+            var ftpConnector1 = new FtpConnector("39.106.225.117", "cjj123", "cjj123");
+            ftpConnector1.ListLocalFiles().ForEach((file => Debug.WriteLine(file)));
         }
     }
 }

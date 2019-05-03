@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -124,7 +125,6 @@ namespace Ftp
         public List<VisualFile> ListRemoteFiles(string dirname)
         {
             Debug.WriteLine(Actions.NList(dirname));
-//            Debug.WriteLine(Actions.List(dirname));
             _mainSocket.Send(EncodingUtf8(Actions.NList(dirname)));
             Debug.WriteLine(WaitReceive(_mainSocket));
             
@@ -133,7 +133,6 @@ namespace Ftp
         public List<VisualFile> ListRemoteFiles()
         {
             Debug.WriteLine(Actions.List());
-//            Debug.WriteLine(Actions.List(dirname));
             _mainSocket.Send(EncodingUtf8(Actions.List()));
             Debug.WriteLine(WaitReceive(_mainSocket));
             var waitReceive = WaitReceive(_dataSocket);
@@ -148,12 +147,16 @@ namespace Ftp
 
         public List<VisualFile> ListLocalFiles()
         {
-            throw new NotImplementedException();
+            return ListLocalFiles(".");
         }
 
         public List<VisualFile> ListLocalFiles(string dirname)
         {
-            throw new NotImplementedException();
+            var normalFiles = Directory.GetFiles(dirname).
+                Select((s => new VisualFile(new FileInfo(s), VisualFile.FType.NormalFile)));
+            var directories = Directory.GetDirectories(dirname)
+                .Select((s => new VisualFile(new FileInfo(s), VisualFile.FType.Directory)));
+            return normalFiles.Concat(directories).ToList();
         }
 
         public void Close()

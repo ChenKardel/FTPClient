@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 
 namespace Ftp.@interface
@@ -12,7 +13,7 @@ namespace Ftp.@interface
             Link
         }
 
-        public int Bytes { get; }
+        public long Bytes { get; }
 
         public DateTime Time { get; set; }
 
@@ -20,7 +21,7 @@ namespace Ftp.@interface
 
         public string Filename { get; }
 
-        public VisualFile(string filename, FType fileType, int bytes,DateTime time)
+        public VisualFile(string filename, FType fileType, long bytes,DateTime time)
         {
             Filename = filename;
             FileType = fileType;
@@ -28,6 +29,13 @@ namespace Ftp.@interface
             Bytes = bytes;
         }
 
+        public VisualFile(FileInfo fileInfo, FType fType)
+        {
+            Filename = fileInfo.Name;
+            Time = fileInfo.LastWriteTime;
+            Bytes = fileInfo.Length;
+            FileType = fType;
+        }
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
