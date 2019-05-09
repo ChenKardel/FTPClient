@@ -160,22 +160,22 @@ namespace Ftp
             throw new NotImplementedException();
         }
 
-        public bool Upload(Socket socket, string filename)
+        public bool Upload(string filename)
         {
             throw new NotImplementedException();
         }
 
-        public bool Upload(Socket socket, FileStream fileStream)
+        public bool Upload(FileStream fileStream)
         {
             throw new NotImplementedException();
         }
 
-        public bool ContinueUpload(Socket socket, string filename)
+        public bool ContinueUpload(string filename)
         {
             throw new NotImplementedException();
         }
 
-        public bool ContinueUpload(Socket socket, FileStream fileStream)
+        public bool ContinueUpload(FileStream fileStream)
         {
             throw new NotImplementedException();
         }
