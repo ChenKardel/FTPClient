@@ -169,7 +169,14 @@ namespace Ftp.@enum
         {
             return "STOU " + filename + "\r\n";
         }
-
+        public static string Retr(string filename)
+        {
+            return "RETR " + filename + "\r\n";
+        }
+        public static string Put(string filename)
+        {
+            return "Put " + filename + "\r\n";
+        }
         internal enum StructType
         {
             File, Record, Page

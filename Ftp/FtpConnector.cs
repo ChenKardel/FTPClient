@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
@@ -154,15 +155,61 @@ namespace Ftp
 
             return socket;
         }
-
-        public bool Download(string url)
+        //指定下载地址时
+        public bool Download(string remoteAddress,string localAddress)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine(Actions.Retr(remoteAddress));
+            _mainSocket.Send(EncodingUtf8(Actions.Retr(remoteAddress)));
+           
+            var waitReceive = WaitReceive(_dataSocket);
+            Debug.WriteLine(waitReceive);
+            var statecode = WaitReceive(_mainSocket);
+            Debug.WriteLine(statecode);
+            if (File.Exists(localAddress))
+                File.Delete(localAddress);
+            FileStream fs = new FileStream(localAddress, FileMode.Create);
+            byte[] data = System.Text.Encoding.Default.GetBytes(waitReceive );
+            if (data==null)
+            {
+                return false;
+            }
+            fs.Write(data, 0, data.Length);
+            fs.Flush();
+            fs.Close();
+            //根据statecode判断是否成功
+            if (statecode.Substring(0,3).Equals("125"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+          
+
         }
+        //默认下载目录为当前目录
+        public bool Download(string remoteAddress)
+        {
+           return Download(remoteAddress, ".");
+
+        }
+
+
 
         public bool Upload(string filename)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine(Actions.Put(filename));
+            _mainSocket.Send(EncodingUtf8(Actions.Put(filename)));
+            Debug.WriteLine(WaitReceive(_mainSocket));
+            var waitReceive = WaitReceive(_dataSocket);
+            Debug.WriteLine(waitReceive);
+            var files = VisualFileConverter.ConvertTextToVisualFiles(waitReceive);
+            foreach (var visualFile in files)
+            {
+                Debug.WriteLine(visualFile);
+            }
+            return true;
         }
 
         public bool Upload(FileStream fileStream)

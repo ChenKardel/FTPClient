@@ -9,7 +9,9 @@ namespace Ftp.@interface
     {
         Socket Connect(string host, int port, int timeout);
         Socket Connect(string host, int port, string username, string password,int timeout);
+        bool Download(string url,string localaddress);
         bool Download(string url);
+
         bool Upload(string filename);
         bool Upload(FileStream fileStream);
         bool ContinueUpload(string filename);
