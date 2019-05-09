@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Ftp.@enum
 {
+    /// <summary>
+    /// 状态码
+    /// </summary>
     public enum StateCode
     {
         Reset = 202,

@@ -23,42 +23,89 @@ namespace Ftp
     public class FtpConnector: IConnector
     {
         #region variables;
+        /// <summary>
+        /// 用户名
+        /// </summary>
         private string _username;
+        /// <summary>
+        /// 密码
+        /// </summary>
         private string _password;
+        /// <summary>
+        /// host地址
+        /// </summary>
         private string _hostname;
+        /// <summary>
+        /// 端口
+        /// </summary>
         private int _port;
+        /// <summary>
+        /// 命令socket
+        /// </summary>
         private Socket _mainSocket;
-        private Socket _listeningSocket;
+        /// <summary>
+        /// 数据socket
+        /// </summary>
         private Socket _dataSocket;
+        /// <summary>
+        /// 设置的timeout时间
+        /// </summary>
         private int _timeout;
-        private bool _isAnonymous = true;
+        /// <summary>
+        /// 是否为匿名登陆
+        /// </summary>
+        private bool _isAnonymous = false;
         #endregion
 
         #region getter&setter
         #endregion
 
         #region PublicFunction
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="hostname">主机名</param>
+        /// <param name="username">用户名，当用户名为""的时候，默认为匿名登陆</param>
+        /// <param name="password">密码，当密码为""的时候，默认为匿名登陆</param>
+        /// <param name="port">接口</param>
+        /// <param name="timeout">超时</param>
         public FtpConnector(string hostname, string username="", string password="", int port =21, int timeout=2000)
         {
             if (username.Equals("") && password.Equals(""))
             {
                 _username = username;
                 _password = password;
-                _isAnonymous = false;
+                _isAnonymous = true;
             }
+            
             _hostname = hostname;
             _port = port;
             _timeout = timeout;
+            //连接
             _mainSocket = Connect(hostname, port, username, password,timeout);
         }
 
-     
+     /// <summary>
+     /// 进行匿名连接
+     /// </summary>
+     /// <param name="host">主机名</param>
+     /// <param name="port">端口</param>
+     /// <param name="timeout">超时</param>
+     /// <returns></returns>
         public Socket Connect(string host, int port, int timeout)
         {
             return Connect(host, port, "", "", timeout);
         }
 
-       
+       /// <summary>
+       /// 进行连接
+       /// </summary>
+       /// <param name="host">主机名</param>
+       /// <param name="port">端口</param>
+       /// <param name="username">用户名</param>
+       /// <param name="password">密码</param>
+       /// <param name="timeout">超时</param>
+       /// <returns></returns>
         public Socket Connect(string host, int port, string username, string password, int timeout)
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
@@ -67,25 +114,36 @@ namespace Ftp
                 SendTimeout = timeout
             };
             Regex regex = new Regex(@"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+");
+            //判断是ip还是域名
             var isMatch = regex.IsMatch(host);
             IPAddress ipAddress = isMatch ? IPAddress.Parse(host) : Dns.GetHostAddresses(host)[0];
             socket.Connect(ipAddress, port);
-            WaitReceive(socket);
-            socket.Send(EncodingUtf8(Actions.User(username)));
-            WaitReceive(socket);
-            socket.Send(EncodingUtf8(Actions.Password(password)));
-            WaitReceive(socket);
+            //输入密码和用户名
+            //todo:考虑匿名连接
+            if (!_isAnonymous)
+            {
+                WaitReceive(socket);
+                socket.Send(EncodingUtf8(Actions.User(username)));
+                WaitReceive(socket);
+                socket.Send(EncodingUtf8(Actions.Password(password)));
+                WaitReceive(socket);
+            }
+            //被动模式连接
             socket.Send(EncodingUtf8(Actions.Passsive()));
             var receiveMsg = WaitReceive(socket);
+            //如果为被动连接模式
             if (ReadCode(receiveMsg) == StateCode.EnterPassiveMode)
             {
                 var leftPar = receiveMsg.IndexOf("(", StringComparison.Ordinal)+1;
                 var rightPar = receiveMsg.IndexOf(")", StringComparison.Ordinal);
-
                 var passive = receiveMsg.Substring(leftPar, rightPar - leftPar).Split(',');
+                //获取连接的host名
                 var server = passive[0] + "." + passive[1] + "." + passive[2] + "." + passive[3];
+                //获取连接的端口
                 port = (int.Parse(passive[4]) << 8) + int.Parse(passive[5]);
+                //关闭数据socket（无论是否开启过）
                 CloseDataSocket();
+                //数据socket重新连接
                 _dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 _dataSocket.Connect(server, port);
             }
@@ -163,7 +221,9 @@ namespace Ftp
         {
             throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// 关闭数据socket
+        /// </summary>
         public void CloseDataSocket()
         {
             if (_dataSocket != null && _dataSocket.Connected)
@@ -176,7 +236,11 @@ namespace Ftp
 
         #endregion
         #region privateFunction
-
+        /// <summary>
+        /// 从socket中读取数据
+        /// </summary>
+        /// <param name="socket">源socket</param>
+        /// <returns>读取的数据</returns>
         private string SocketReceive(Socket socket)
         {
             const int bufferSize = 256;
@@ -191,21 +255,33 @@ namespace Ftp
             } 
             return result;
         }
-
+        /// <summary>
+        /// 进行数据响应等待
+        /// </summary>
+        /// <param name="millSeconds">等待时间</param>
         private static void Wait(int millSeconds=20)
         {
             Thread.Sleep(TimeSpan.FromMilliseconds(millSeconds));
         }
-
+        /// <summary>
+        /// 等待socket
+        /// </summary>
+        /// <param name="socket">等待socket</param>
+        /// <param name="timeout">极限等到时间</param>
         private static void Wait(Socket socket, int timeout=5000)
         {
             int t = 20;
             while (socket.Available == 0 && timeout > 0)
             {
                 timeout -= 20;
-                Wait(20);
+                Wait(t);
             }
         }
+        /// <summary>
+        /// 解析并且读取code
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         private StateCode ReadCode(string msg)
         {
             Debug.WriteLine(msg);
@@ -219,7 +295,11 @@ namespace Ftp
         {
             return Encoding.UTF8.GetBytes(s);
         }
-
+        /// <summary>
+        /// 等待，并接收数据
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <returns></returns>
         private string WaitReceive(Socket socket)
         {
             Wait(socket);

@@ -11,6 +11,11 @@ namespace Ftp.entity
 {
     static class VisualFileConverter
     {
+        /// <summary>
+        /// 将socket的数据转换为VisualFile实体
+        /// </summary>
+        /// <param name="text">数据</param>
+        /// <returns>可迭代的VisualFile实体</returns>
         public static IEnumerable<VisualFile> ConvertTextToVisualFiles(string text)
         {
             var items = text.Split('\n');
