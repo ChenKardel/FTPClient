@@ -155,6 +155,7 @@ namespace Ftp
 
             return socket;
         }
+
         //指定下载地址时
         public bool Download(string remoteAddress,string localAddress)
         {
@@ -195,20 +196,34 @@ namespace Ftp
 
         }
 
+        //
 
-
-        public bool Upload(string filename)
+        public bool Upload(string remoteAddress, string localAddress)
         {
-            Debug.WriteLine(Actions.Put(filename));
-            _mainSocket.Send(EncodingUtf8(Actions.Put(filename)));
-            Debug.WriteLine(WaitReceive(_mainSocket));
-            var waitReceive = WaitReceive(_dataSocket);
-            Debug.WriteLine(waitReceive);
-            var files = VisualFileConverter.ConvertTextToVisualFiles(waitReceive);
-            foreach (var visualFile in files)
+            FileStream fs = new FileStream(localAddress, FileMode.Open);
+            byte[] data= new byte[0];
+            if (fs!=null)
             {
-                Debug.WriteLine(visualFile);
+                BinaryReader r = new BinaryReader(fs);
+                r.BaseStream.Seek(0, SeekOrigin.Begin);    //将文件指针设置到文件开
+                data = r.ReadBytes((int)r.BaseStream.Length);
+                fs.Close();
+
             }
+            else
+            {
+                return false;
+            }
+           
+            _dataSocket.Send(data);
+            var waitReceive = WaitReceive(_dataSocket);
+
+            _mainSocket.Send(EncodingUtf8(Actions.Stor(remoteAddress)));
+
+            Debug.WriteLine(waitReceive);
+            var statecode = WaitReceive(_mainSocket);
+            Debug.WriteLine(statecode);
+
             return true;
         }
 
@@ -216,6 +231,8 @@ namespace Ftp
         {
             throw new NotImplementedException();
         }
+
+
 
         public bool ContinueUpload(string filename)
         {

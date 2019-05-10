@@ -17,7 +17,7 @@ namespace Test
         {
 
             var ftpConnector1 = new FtpConnector("39.106.225.117", "cjj123", "cjj123");
-        ftpConnector1.Download("FirstFolder/welcome_again.txt", "/Users/youzhou/tool/result.txt");
+        ftpConnector1.Upload("FirstFolder/welcome_3.txt", "/Users/youzhou/tool/result.txt");
 
 
         }

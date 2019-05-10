@@ -52,7 +52,6 @@
     <Compile Include="interface\IConnector.cs" />
     <Compile Include="entity\VisualFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EmptyCSharpFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
