@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace Ftp.@interface
 {
-    interface IConnector
+    public interface IConnector
     {
         Socket Connect(string host, int port, int timeout);
         Socket Connect(string host, int port, string username, string password,int timeout);

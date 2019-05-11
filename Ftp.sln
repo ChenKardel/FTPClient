@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FtpTest", "FtpTest\FtpTest.csproj", "{2DC8E0C9-DD46-48AF-8588-20F7BBF1B026}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FtpClient", "FtpClient\FtpClient.csproj", "{2EC09785-6A2C-4C69-904E-AEA1A1C175EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2DC8E0C9-DD46-48AF-8588-20F7BBF1B026}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DC8E0C9-DD46-48AF-8588-20F7BBF1B026}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DC8E0C9-DD46-48AF-8588-20F7BBF1B026}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EC09785-6A2C-4C69-904E-AEA1A1C175EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EC09785-6A2C-4C69-904E-AEA1A1C175EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EC09785-6A2C-4C69-904E-AEA1A1C175EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EC09785-6A2C-4C69-904E-AEA1A1C175EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
