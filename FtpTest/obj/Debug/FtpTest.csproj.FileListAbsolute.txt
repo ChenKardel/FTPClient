@@ -19,3 +19,5 @@ C:\Users\11145\source\repos\Ftp\FtpTest\obj\Debug\FtpTest.csproj.CoreCompileInpu
 C:\Users\11145\source\repos\Ftp\FtpTest\obj\Debug\FtpTest.csproj.CopyComplete
 C:\Users\11145\source\repos\Ftp\FtpTest\obj\Debug\FtpTest.dll
 C:\Users\11145\source\repos\Ftp\FtpTest\obj\Debug\FtpTest.pdb
+C:\Users\11145\source\repos\Ftp\FtpTest\bin\Debug\log4net.dll
+C:\Users\11145\source\repos\Ftp\FtpTest\bin\Debug\log4net.xml

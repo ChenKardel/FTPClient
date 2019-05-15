@@ -20,7 +20,7 @@ namespace FtpClient
     /// </summary>
     public partial class ConnectionWindow : Window
     {
-        private IConnector connector;
+        private FtpConnector connector;
         public ConnectionWindow()
         {
             connector = new FtpConnector();
@@ -29,7 +29,20 @@ namespace FtpClient
 
         private void LinkBtn_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            var hostname = FtpAddressTextBox.Text;
+            var password = PwdBox.Password;
+            var username = UsernameTextBox.Text;
+            var success = connector.ConnectSave(hostname, connector.Port, username, password,2000);
+            if (success)
+            {
+                MessageBox.Show("Success!");
+                //todo
+            }
+            else
+            {
+                MessageBox.Show("Fail!");
+                //todo
+            }
         }
     }
 }

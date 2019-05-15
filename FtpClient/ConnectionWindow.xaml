@@ -41,7 +41,7 @@
                         <Label Content="远端文件" FontSize="10" Background="#FF003FAA" Foreground="White" BorderBrush="White" Margin="0,0,0,-6"/>
                         <TextBox Height="20" TextWrapping="NoWrap" Text="" Width="427" BorderBrush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Background="#FFBED6F7"/>
                     </StackPanel>
-                    <TreeView Height="660" Width="auto" x:Name=" ">
+                    <TreeView Height="660" Width="auto" x:Name="LocalFilesTreeView">
                         <TreeViewItem Header="" Width="auto" IsExpanded="False">
                             <TreeViewItem Header="" Height="auto"/>
                             <TreeViewItem Header="" Height="auto"/>

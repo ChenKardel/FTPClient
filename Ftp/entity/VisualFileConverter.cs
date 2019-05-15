@@ -21,7 +21,6 @@ namespace Ftp.entity
             var items = text.Split('\n');
             foreach (var item in items)
             {
-                Debug.WriteLine(item);
                 var s = item.Trim();
 
                 Regex regex =

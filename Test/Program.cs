@@ -5,9 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Ftp;
 using Ftp.@enum;
+//using Ftp;
+using Ftp.exp;
+using Ftp.exp;
 using Ftp.@interface;
+using FtpClient = Ftp.FtpClient;
+//using FtpClient = Ftp.exp.FtpClient;
 
 namespace Test
 {
@@ -15,11 +19,21 @@ namespace Test
     {
         static void Main(string[] args)
         {
-
-            var ftpConnector1 = new FtpConnector("39.106.225.117", "cjj123", "cjj123");
-        ftpConnector1.Upload("FirstFolder/welcome_3.txt", "/Users/youzhou/tool/result.txt");
-
-
+//            var ftpClient = new FtpClient("47.100.3.187", "cjj123", "cjj123");
+//            var files = ftpClient.GetCurDirList(FtpFileType.All);
+//            foreach (var ftpFileInfo in files)
+//            {
+//                Debug.WriteLine(ftpFileInfo.FileName);
+//            }
+//            Debug.WriteLine(ftpClient.PasvMode);
+//            var files2 = ftpClient.GetCurDirList(FtpFileType.All);
+//            foreach (var ftpFileInfo in files2)
+//            {
+//                Debug.WriteLine(ftpFileInfo.FileName);
+//            }
+            var ftpClient = new FtpClient("47.100.3.187", "cjj123", "cjj123");
+            ftpClient.Connect();
+            ftpClient.GetRemoteFiles();
         }
     }
 }

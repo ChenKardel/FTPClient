@@ -7,8 +7,10 @@ namespace Ftp.@interface
 {
     public interface IConnector
     {
-        Socket Connect(string host, int port, int timeout);
-        Socket Connect(string host, int port, string username, string password,int timeout);
+        bool Connect(string host, int port, int timeout);
+        bool Connect();
+        bool Connect(string host, int port, string username, string password,int timeout);
+        
         bool Download(string url,string localAddress);
         bool Download(string url);
 

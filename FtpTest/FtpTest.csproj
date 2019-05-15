@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Compile Include="Test2.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ftp\Ftp.csproj">
