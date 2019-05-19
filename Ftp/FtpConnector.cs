@@ -137,7 +137,7 @@ namespace Ftp
                 _controlSocket.Send(EncodingUtf8(Actions.Passsive()));
                 var receiveMsg = WaitReceive(_controlSocket);
                 //如果为被动连接模式
-                if (ReadCode(receiveMsg) == StateCode.EnterPassiveMode)
+                if (ReadCode(receiveMsg) == StateCode.PassiveMode227)
                 {
                     var ipEndPoint = ParsePassiveIp(receiveMsg);
                     var dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -241,7 +241,13 @@ namespace Ftp
 
         public void ChangeRemoteDir(string dirname)
         {
-            throw new NotImplementedException();
+            _controlSocket.Send(EncodingUtf8(Actions.ChangeCwd(dirname)));
+            var waitReceive = WaitReceive(_controlSocket);
+            Debug.WriteLine(waitReceive);
+            if (ReadCode(waitReceive) != StateCode.ChangeDir250)
+            {
+                
+            }
         }
 
         public List<VisualFile> ListLocalFiles(string dirname)

@@ -22,8 +22,8 @@ namespace Ftp.@enum
         FileState = 213,
         HelpInfo = 214,
         NameSystemType = 215,
-        EnterPassiveMode = 227,
-
+        PassiveMode227 = 227,
+        ChangeDir250 = 250,
         NewUserReady = 220,
         Close = 221,
         NoTransport = 225,

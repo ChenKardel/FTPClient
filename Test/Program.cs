@@ -21,10 +21,7 @@ namespace Test
             {
                 Debug.WriteLine(remoteFile);
             }
-            foreach (var remoteFile in ftpConnector1.ListRemoteFiles())
-            {
-                Debug.WriteLine(remoteFile);
-            }
+            ftpConnector1.ChangeRemoteDir("f");
         }
     }
 }
