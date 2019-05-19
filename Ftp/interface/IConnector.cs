@@ -7,11 +7,10 @@ namespace Ftp.@interface
 {
     public interface IConnector
     {
-        Socket Connect(string host, int port, int timeout);
-        Socket Connect(string host, int port, string username, string password,int timeout);
+        void Connect();
         bool Download(string url,string localAddress);
         bool Download(string url);
-
+        Socket GetDataSocket();
         bool Upload(string remoteAddress, string localAddress);
         bool Upload(FileStream fileStream);
         bool ContinueUpload(string filename);
@@ -21,6 +20,6 @@ namespace Ftp.@interface
         List<VisualFile> ListLocalFiles();
         List<VisualFile> ListLocalFiles(string dirname);
         void Close();
-        void CloseDataSocket();
+        void CloseDataSocket(Socket dataSocket);
     }
 }

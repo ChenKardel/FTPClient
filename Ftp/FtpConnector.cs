@@ -24,147 +24,80 @@ namespace Ftp
     public class FtpConnector: IConnector
     {
         #region variables;
-        /// <summary>
-        /// 用户名
-        /// </summary>
-        private string _username;
-        /// <summary>
-        /// 密码
-        /// </summary>
-        private string _password;
-        /// <summary>
-        /// host地址
-        /// </summary>
-        private string _hostname;
-        /// <summary>
-        /// 端口
-        /// </summary>
-        private int _port;
-        /// <summary>
-        /// 命令socket
-        /// </summary>
-        private Socket _mainSocket;
-        /// <summary>
-        /// 数据socket
-        /// </summary>
-        private Socket _dataSocket;
-        /// <summary>
-        /// 设置的timeout时间
-        /// </summary>
-        private int _timeout;
-        /// <summary>
-        /// 是否为匿名登陆
-        /// </summary>
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Hostname { get; set; }
+        public int Port { get; set; }
+        public int TimeOutLimit { get; set; }
+        private Socket _controlSocket;
         private bool _isAnonymous = false;
+        public bool IsConnected { get; } = false;
+        public FtpMode Mode { get; set; } = FtpMode.Passive;
         #endregion
-
-        #region getter&setter
-        #endregion
-
         #region PublicFunction
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="hostname">主机名</param>
-        /// <param name="username">用户名，当用户名为""的时候，默认为匿名登陆</param>
-        /// <param name="password">密码，当密码为""的时候，默认为匿名登陆</param>
-        /// <param name="port">接口</param>
-        /// <param name="timeout">超时</param>
+
+        public enum FtpMode
+        {
+            Passive, 
+            Port
+        }
         public FtpConnector(string hostname, string username="", string password="", int port =21, int timeout=2000)
         {
             if (username.Equals("") && password.Equals(""))
             {
-                _username = username;
-                _password = password;
                 _isAnonymous = true;
             }
-            
-            _hostname = hostname;
-            _port = port;
-            _timeout = timeout;
+            else
+            {
+                _isAnonymous = false;
+            }
+            Username = username;
+            Password = password;
+            Hostname = hostname;
+            Port = port;
+            TimeOutLimit = timeout;
             //连接
-            _mainSocket = Connect(hostname, port, username, password,timeout);
+            
         }
-
-     /// <summary>
-     /// 进行匿名连接
-     /// </summary>
-     /// <param name="host">主机名</param>
-     /// <param name="port">端口</param>
-     /// <param name="timeout">超时</param>
-     /// <returns></returns>
-        public Socket Connect(string host, int port, int timeout)
-        {
-            return Connect(host, port, "", "", timeout);
-        }
-
-       /// <summary>
-       /// 进行连接
-       /// </summary>
-       /// <param name="host">主机名</param>
-       /// <param name="port">端口</param>
-       /// <param name="username">用户名</param>
-       /// <param name="password">密码</param>
-       /// <param name="timeout">超时</param>
-       /// <returns></returns>
-        public Socket Connect(string host, int port, string username, string password, int timeout)
+        
+        public void Connect()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             {
-                ReceiveTimeout = timeout,
-                SendTimeout = timeout
+                ReceiveTimeout = TimeOutLimit,
+                SendTimeout = TimeOutLimit
             };
             Regex regex = new Regex(@"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+");
             //判断是ip还是域名
-            var isMatch = regex.IsMatch(host);
-            IPAddress ipAddress = isMatch ? IPAddress.Parse(host) : Dns.GetHostAddresses(host)[0];
-            socket.Connect(ipAddress, port);
-            //输入密码和用户名
-            //todo:考虑匿名连接
+            var isMatch = regex.IsMatch(Hostname);
+            IPAddress ipAddress = isMatch ? IPAddress.Parse(Hostname) : Dns.GetHostAddresses(Hostname)[0];
+            socket.Connect(ipAddress, Port);
             if (!_isAnonymous)
             {
                 WaitReceive(socket);
-                socket.Send(EncodingUtf8(Actions.User(username)));
+                socket.Send(EncodingUtf8(Actions.User(Username)));
                 WaitReceive(socket);
-                socket.Send(EncodingUtf8(Actions.Password(password)));
+                socket.Send(EncodingUtf8(Actions.Password(Password)));
                 WaitReceive(socket);
-            }
-            //被动模式连接
-            socket.Send(EncodingUtf8(Actions.Passsive()));
-            var receiveMsg = WaitReceive(socket);
-            //如果为被动连接模式
-            if (ReadCode(receiveMsg) == StateCode.EnterPassiveMode)
-            {
-                var leftPar = receiveMsg.IndexOf("(", StringComparison.Ordinal)+1;
-                var rightPar = receiveMsg.IndexOf(")", StringComparison.Ordinal);
-                var passive = receiveMsg.Substring(leftPar, rightPar - leftPar).Split(',');
-                //获取连接的host名
-                var server = passive[0] + "." + passive[1] + "." + passive[2] + "." + passive[3];
-                //获取连接的端口
-                port = (int.Parse(passive[4]) << 8) + int.Parse(passive[5]);
-                //关闭数据socket（无论是否开启过）
-                CloseDataSocket();
-                //数据socket重新连接
-                _dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _dataSocket.Connect(server, port);
+                _controlSocket = socket;
             }
             else
             {
                 throw new NotImplementedException();
             }
 
-            return socket;
         }
 
         //指定下载地址时
         public bool Download(string remoteAddress,string localAddress)
         {
+            var dataSocket = GetDataSocket();
             Debug.WriteLine(Actions.Retr(remoteAddress));
-            _mainSocket.Send(EncodingUtf8(Actions.Retr(remoteAddress)));
+            _controlSocket.Send(EncodingUtf8(Actions.Retr(remoteAddress)));
            
-            var waitReceive = WaitReceive(_dataSocket);
+            var waitReceive = WaitReceive(dataSocket);
             Debug.WriteLine(waitReceive);
-            var statecode = WaitReceive(_mainSocket);
+            var statecode = WaitReceive(_controlSocket);
             Debug.WriteLine(statecode);
             if (File.Exists(localAddress))
                 File.Delete(localAddress);
@@ -186,7 +119,7 @@ namespace Ftp
             {
                 return false;
             }
-          
+            CloseDataSocket(dataSocket);
 
         }
         //默认下载目录为当前目录
@@ -196,10 +129,49 @@ namespace Ftp
 
         }
 
+        public Socket GetDataSocket()
+        {
+            //被动模式连接
+            if (Mode == FtpMode.Passive)
+            {
+                _controlSocket.Send(EncodingUtf8(Actions.Passsive()));
+                var receiveMsg = WaitReceive(_controlSocket);
+                //如果为被动连接模式
+                if (ReadCode(receiveMsg) == StateCode.EnterPassiveMode)
+                {
+                    var ipEndPoint = ParsePassiveIp(receiveMsg);
+                    var dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    dataSocket.Connect(ipEndPoint);
+                    return dataSocket;
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private static IPEndPoint ParsePassiveIp(string passiveIpString)
+        {
+            var leftPar = passiveIpString.IndexOf("(", StringComparison.Ordinal) + 1;
+            var rightPar = passiveIpString.IndexOf(")", StringComparison.Ordinal);
+            var passive = passiveIpString.Substring(leftPar, rightPar - leftPar).Split(',');
+            //获取连接的host名
+            var dataSocketServer = passive[0] + "." + passive[1] + "." + passive[2] + "." + passive[3];
+            //获取连接的端口
+            var dataSocketPort = (int.Parse(passive[4]) << 8) + int.Parse(passive[5]);
+            return new IPEndPoint(IPAddress.Parse(dataSocketServer), dataSocketPort);
+        }
+
         //
 
         public bool Upload(string remoteAddress, string localAddress)
         {
+            var dataSocket = GetDataSocket();
             FileStream fs = new FileStream(localAddress, FileMode.Open);
             byte[] data= new byte[0];
             if (fs!=null)
@@ -215,15 +187,15 @@ namespace Ftp
                 return false;
             }
            
-            _dataSocket.Send(data);
-            var waitReceive = WaitReceive(_dataSocket);
+            dataSocket.Send(data);
+            var waitReceive = WaitReceive(dataSocket);
 
-            _mainSocket.Send(EncodingUtf8(Actions.Stor(remoteAddress)));
+            _controlSocket.Send(EncodingUtf8(Actions.Stor(remoteAddress)));
 
             Debug.WriteLine(waitReceive);
-            var statecode = WaitReceive(_mainSocket);
+            var statecode = WaitReceive(_controlSocket);
             Debug.WriteLine(statecode);
-
+            CloseDataSocket(dataSocket);
             return true;
         }
 
@@ -247,23 +219,21 @@ namespace Ftp
         public List<VisualFile> ListRemoteFiles(string dirname)
         {
             Debug.WriteLine(Actions.NList(dirname));
-            _mainSocket.Send(EncodingUtf8(Actions.NList(dirname)));
-            Debug.WriteLine(WaitReceive(_mainSocket));
+            _controlSocket.Send(EncodingUtf8(Actions.NList(dirname)));
+            Debug.WriteLine(WaitReceive(_controlSocket));
             
             return null;
         }
         public List<VisualFile> ListRemoteFiles()
         {
+            var dataSocket = GetDataSocket();
             Debug.WriteLine(Actions.List());
-            _mainSocket.Send(EncodingUtf8(Actions.List()));
-            Debug.WriteLine(WaitReceive(_mainSocket));
-            var waitReceive = WaitReceive(_dataSocket);
+            _controlSocket.Send(EncodingUtf8(Actions.List()));
+            Debug.WriteLine(WaitReceive(_controlSocket));
+            var waitReceive = WaitReceive(dataSocket);
             Debug.WriteLine(waitReceive);
             var files = VisualFileConverter.ConvertTextToVisualFiles(waitReceive);
-            foreach (var visualFile in files)
-            {
-                Debug.WriteLine(visualFile);
-            }
+            CloseDataSocket(dataSocket);
             return files.ToList();
         }
 
@@ -285,17 +255,14 @@ namespace Ftp
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// 关闭数据socket
-        /// </summary>
-        public void CloseDataSocket()
-        {
-            if (_dataSocket != null && _dataSocket.Connected)
-            {
-                _dataSocket.Close();
-            }
 
-            _dataSocket = null;
+        public void CloseDataSocket(Socket dataSocket)
+        {
+            if (dataSocket == null) return;
+            if (dataSocket.Connected)
+            {
+                dataSocket.Close();
+            }
         }
 
         #endregion

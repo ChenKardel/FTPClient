@@ -10,17 +10,26 @@ namespace FtpTest
     public class FtpConnectorTest
     {
         [TestMethod]
-        public void TestInit()
+        public void TestConnection()
         {
-            var ftpConnector1 = new FtpConnector("39.106.225.117", "cjj123", "cjj123");
+            var ftpConnector1 = new FtpConnector("47.100.3.187", "cjj123", "cjj123");
+            ftpConnector1.Connect();
             Console.WriteLine(ftpConnector1.ListLocalFiles());
         }
 
         [TestMethod]
-        public void TestVisualFileToString()
+        public void TestListRemoteFiles()
         {
-            var visualFile = new VisualFile("hello.txt", VisualFile.FType.NormalFile, 1024, DateTime.Now);
-            Debug.WriteLine(visualFile.ToString());
+            var ftpConnector1 = new FtpConnector("47.100.3.187", "cjj123", "cjj123");
+            ftpConnector1.Connect();
+            foreach (var remoteFile in ftpConnector1.ListRemoteFiles())
+            {
+                Debug.WriteLine(remoteFile);
+            }
+            foreach (var remoteFile in ftpConnector1.ListRemoteFiles())
+            {
+                Debug.WriteLine(remoteFile);
+            }
         }
 
 
