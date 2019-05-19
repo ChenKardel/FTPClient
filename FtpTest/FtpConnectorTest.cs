@@ -39,36 +39,11 @@ namespace FtpTest
 
         
         [DataTestMethod]
-        [DataRow("/hello/world","..", '/')]
-        [DataRow("/hello/world", "kardel", '/')]
-        [DataRow("/", "kardel", '/')]
-        [DataRow("/", "..", '/')]
-        public void ChangeDir(string path, string newDir, char seperator = '/')
+        
+        public void ChangeDir()
         {
-            Debug.WriteLine("123");
-            if (path != "/")
-            {
-                if (newDir == "..")
-                {
-                    var lastIndexOf = path.LastIndexOf(seperator);
-                    Debug.WriteLine(path.Substring(0, lastIndexOf));
-                }
-                else
-                {
-                    Debug.WriteLine(path + seperator + newDir);
-                }
-            }
-            else
-            {
-                if (newDir == "..")
-                {
-                    Debug.WriteLine("Error");
-                }
-                else
-                {
-                    Debug.WriteLine(path + newDir);
-                }
-            }
+
+            Debug.WriteLine(System.IO.Path.DirectorySeparatorChar);
 
         }
 

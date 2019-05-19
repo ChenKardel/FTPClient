@@ -159,6 +159,7 @@ namespace Ftp
             fs.Flush();
             fs.Close();
             //根据statecode判断是否成功
+            CloseDataSocket(dataSocket);
             if (statecode.Substring(0, 3).Equals("125"))
             {
                 return true;
@@ -167,7 +168,6 @@ namespace Ftp
             {
                 return false;
             }
-            CloseDataSocket(dataSocket);
 
         }
         //默认下载目录为当前目录
@@ -184,6 +184,7 @@ namespace Ftp
             {
                 _controlSocket.Send(EncodingUtf8(Actions.Passsive()));
                 var receiveMsg = WaitReceive(_controlSocket);
+                
                 //如果为被动连接模式
                 if (ReadCode(receiveMsg) == StateCode.PassiveMode227)
                 {
@@ -411,6 +412,11 @@ namespace Ftp
         private StateCode ReadCode(string msg)
         {
             Debug.WriteLine(msg);
+            
+            if (msg.Contains("\r\n"))
+            {
+                msg = msg.TrimEnd().Split('\n').Last();
+            }
             Regex regex = new Regex(@"[0-9]{3}");
             var match = regex.Match(msg);
             Enum.TryParse(match.Value, out StateCode stateCode);

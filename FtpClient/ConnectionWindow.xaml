@@ -53,10 +53,10 @@
                     <ListBox Height="660" Width="auto" x:Name="RemoteFileListBox"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Background="#FFEFF1EE">
-                    <Button Content="下载" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF707070" Margin="10,0,0,0" ></Button>
+                    <Button Name="DownloadBtn" Content="下载" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF707070" Margin="10,0,0,0" Click="DownloadBtn_OnClick"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1" Background="#FF003FAA">
-                    <Button Content="上传" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" Margin="10,0,0,0" />
+                    <Button Name="UploadBtn" Content="上传" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" Margin="10,0,0,0"  Click="UploadBtn_OnClick"/>
                 </StackPanel>
             </Grid>
         </StackPanel>
