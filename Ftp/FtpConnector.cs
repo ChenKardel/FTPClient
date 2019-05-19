@@ -24,8 +24,41 @@ namespace Ftp
     public class FtpConnector : IConnector
     {
         #region variables;
-        public string Username { get; set; }
-        public string Password { get; set; }
+
+        public string Username
+        {
+            get => _username;
+            set
+            {
+                _username = value;
+                if (value == "" && Password == "")
+                {
+                    _isAnonymous = true;
+                }
+                else
+                {
+                    _isAnonymous = false;
+                }
+            }
+        }
+
+        public string Password
+        {
+            get => _password;
+            set
+            {
+                _password = value;
+                if (value == "" && Username == "")
+                {
+                    _isAnonymous = true;
+                }
+                else
+                {
+                    _isAnonymous = false;
+                }
+            }
+        }
+
         public string Hostname { get; set; }
         public int Port { get; set; }
         public int TimeOutLimit { get; set; }
@@ -35,6 +68,9 @@ namespace Ftp
         public FtpMode Mode { get; set; } = FtpMode.Passive;
         public string LocalPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         public string RemotePath = "/";
+        private string _username;
+        private string _password;
+
         #endregion
         #region PublicFunction
         public event LogDelegate LogEvent;
@@ -44,25 +80,16 @@ namespace Ftp
             Passive,
             Port
         }
-        public FtpConnector(string hostname, string username = "", string password = "", int port = 21, int timeout = 2000)
+        public FtpConnector(string hostname="", string username = "", string password = "", int port = 21, int timeout = 2000)
         {
-            if (username.Equals("") && password.Equals(""))
-            {
-                _isAnonymous = true;
-            }
-            else
-            {
-                _isAnonymous = false;
-            }
             Username = username;
             Password = password;
             Hostname = hostname;
             Port = port;
             TimeOutLimit = timeout;
-            //连接
-
         }
 
+       
         public void Connect()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
@@ -74,15 +101,33 @@ namespace Ftp
             //判断是ip还是域名
             var isMatch = regex.IsMatch(Hostname);
             IPAddress ipAddress = isMatch ? IPAddress.Parse(Hostname) : Dns.GetHostAddresses(Hostname)[0];
-            socket.Connect(ipAddress, Port);
+            try
+            {
+                socket.Connect(ipAddress, Port);
+                LogEvent?.Invoke(new Log("成功连接FTP服务器"));
+            }
+            catch (SocketException)
+            {
+                LogEvent?.Invoke(new Log("无法连接FTP服务器，地址错误？"));
+                return;
+            }
+
             if (!_isAnonymous)
             {
-                WaitReceive(socket);
+                Debug.WriteLine(WaitReceive(socket));
                 socket.Send(EncodingUtf8(Actions.User(Username)));
-                WaitReceive(socket);
+                Debug.WriteLine(WaitReceive(socket));
                 socket.Send(EncodingUtf8(Actions.Password(Password)));
-                WaitReceive(socket);
-                _controlSocket = socket;
+                var buf = WaitReceive(socket);
+                if (ReadCode(buf) == StateCode.UserLoginFail530)
+                {
+                    LogEvent?.Invoke(new Log("用户无法登录，密码或用户名错误?"));    
+                }
+                else
+                {
+                    _controlSocket = socket;
+                    LogEvent?.Invoke(new Log("用户登录成功"));
+                }
             }
             else
             {
@@ -297,7 +342,7 @@ namespace Ftp
                 Select((s => new VisualFile(new FileInfo(s))));
             var directories = Directory.GetDirectories(LocalPath)
                 .Select((s => new VisualFile(new DirectoryInfo(s))));
-            return normalFiles.Concat(directories).ToList();
+            return directories.Concat(normalFiles).ToList();
         }
 
         public void Close()

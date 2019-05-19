@@ -11,9 +11,13 @@ namespace FtpTest
     public class FtpConnectorTest
     {
         [TestMethod]
-        public void TestConnection()
+        [DataRow("47.100.3.187", "cjj123", "cjj123")]
+        [DataRow("47.100.4.187", "cjj123", "cjj123")]
+        [DataRow("47.100.3.187", "cjj124", "cjj123")]
+        [DataRow("47.100.3.187", "cjj123", "cjj124")]
+        public void TestConnection(string host, string username, string password)
         {
-            var ftpConnector1 = new FtpConnector("47.100.3.187", "cjj123", "cjj123");
+            var ftpConnector1 = new FtpConnector(host, username, password);
             ftpConnector1.Connect();
             Console.WriteLine(ftpConnector1.ListLocalFiles());
         }

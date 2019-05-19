@@ -18,3 +18,5 @@ C:\Users\11145\source\repos\Ftp\FtpClient\obj\Debug\FtpClient.csproj.CoreCompile
 C:\Users\11145\source\repos\Ftp\FtpClient\obj\Debug\FtpClient.csproj.CopyComplete
 C:\Users\11145\source\repos\Ftp\FtpClient\obj\Debug\FtpClient.exe
 C:\Users\11145\source\repos\Ftp\FtpClient\obj\Debug\FtpClient.pdb
+C:\Users\11145\source\repos\Ftp\FtpClient\obj\Debug\controller\FileItem.g.cs
+C:\Users\11145\source\repos\Ftp\FtpClient\obj\Debug\controller\FileItem.baml

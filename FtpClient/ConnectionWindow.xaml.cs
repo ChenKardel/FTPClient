@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Ftp;
 using Ftp.@interface;
+using FtpClient.controller;
+
 namespace FtpClient
 {
     /// <summary>
@@ -20,28 +22,44 @@ namespace FtpClient
     /// </summary>
     public partial class ConnectionWindow : Window
     {
-        private FtpConnector connector;
+        private FtpConnector _connector;
         public ConnectionWindow()
         {
-            connector = new FtpConnector();
             InitializeComponent();
+            _connector = new FtpConnector();
+            this.FtpAddressTextBox.Text = "47.100.3.187";
+            this.UsernameTextBox.Text = "cjj123";
+            this.PwdBox.Password = "cjj123";
         }
 
         private void LinkBtn_OnClick(object sender, RoutedEventArgs e)
         {
-            var hostname = FtpAddressTextBox.Text;
-            var password = PwdBox.Password;
-            var username = UsernameTextBox.Text;
-            var success = connector.ConnectSave(hostname, connector.Port, username, password,2000);
-            if (success)
+            var password = this.PwdBox.Password;
+            var username = this.UsernameTextBox.Text;
+            var host = this.FtpAddressTextBox.Text;
+            _connector.Password = password;
+            _connector.Username = username;
+            _connector.Hostname = host;
+            _connector.Connect();
+            RefreshRemoteFiles();
+            RefreshLocalFiles();
+        }
+
+        private void RefreshLocalFiles()
+        {
+            var localFiles = _connector.ListLocalFiles();
+            foreach (var localFile in localFiles)
             {
-                MessageBox.Show("Success!");
-                //todo
+                this.LocalFileListBox.Items.Add(new FileItem(localFile));
             }
-            else
+        }
+
+        private void RefreshRemoteFiles()
+        {
+            var remoteFiles = _connector.ListRemoteFiles();
+            foreach (var remoteFile in remoteFiles)
             {
-                MessageBox.Show("Fail!");
-                //todo
+                this.RemoteFileListBox.Items.Add(new FileItem(remoteFile));
             }
         }
     }

@@ -4,12 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FtpClient"
+        xmlns:controller="clr-namespace:FtpClient.controller"
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1200">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="465*"/>
-            <RowDefinition Height="304*"/>
+            <RowDefinition Height="451*"/>
+            <RowDefinition Height="318*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.RowSpan="2">
             <ToolBarPanel Height="60" VerticalAlignment="Top" Orientation="Horizontal">
@@ -33,26 +34,15 @@
                     <RowDefinition Height="auto" MinHeight="30"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"></ColumnDefinition>
-                    <ColumnDefinition Width="3*"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Height="20">
-                        <Label Content="远端文件" FontSize="10" Background="#FF003FAA" Foreground="White" BorderBrush="White" Margin="0,0,0,-6"/>
-                        <TextBox Height="20" TextWrapping="NoWrap" Text="" Width="427" BorderBrush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Background="#FFBED6F7"/>
+                        <Label Content="本地文件" FontSize="10" Background="#FF003FAA" Foreground="White" BorderBrush="White" Margin="0,0,0,-6"/>
+                        <TextBox Height="20" TextWrapping="NoWrap" Text="" Width="546" BorderBrush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Background="#FFBED6F7"/>
                     </StackPanel>
-                    <TreeView Height="660" Width="auto" x:Name="LocalFilesTreeView">
-                        <TreeViewItem Header="" Width="auto" IsExpanded="False">
-                            <TreeViewItem Header="" Height="auto"/>
-                            <TreeViewItem Header="" Height="auto"/>
-                            <TreeViewItem Header="" Height="auto"/>
-                            <TreeViewItem Header="" Height="auto">
-                                <TreeViewItem Header="" Height="auto"/>
-                                <TreeViewItem Header="" Height="auto"/>
-                            </TreeViewItem>
-                            <TreeViewItem Header="" Height="auto"/>
-                        </TreeViewItem>
-                    </TreeView>
+                    <ListBox Height="660" Width="auto" x:Name="LocalFileListBox" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Height="20">
@@ -60,11 +50,7 @@
                         <TextBox Height="20" TextWrapping="NoWrap" Text="" Width="665" BorderBrush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Background="#FFBED6F7"/>
                     </StackPanel>
 
-                    <TreeView Height="660" Width="auto" x:Name="Loacl">
-                        <TreeViewItem Header="A" Width="auto" IsExpanded="False">
-                            <TreeViewItem Header="a" Height="auto"/>
-                        </TreeViewItem>
-                    </TreeView>
+                    <ListBox Height="660" Width="auto" x:Name="RemoteFileListBox"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Background="#FFEFF1EE">
                     <Button Content="下载" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF707070" Margin="10,0,0,0" ></Button>

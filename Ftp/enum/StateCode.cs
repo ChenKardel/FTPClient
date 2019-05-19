@@ -14,6 +14,7 @@ namespace Ftp.@enum
         DataConnectionOpen125 = 125,
         PassiveMode227 = 227,
         ChangeDir250 = 250,
+        UserLoginFail530 = 530,
         NoSuchFileDirectory550 = 550,
     }
 
