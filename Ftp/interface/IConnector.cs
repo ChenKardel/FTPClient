@@ -16,9 +16,9 @@ namespace Ftp.@interface
         bool ContinueUpload(string filename);
         bool ContinueUpload(FileStream fileStream);
         List<VisualFile> ListRemoteFiles();
-        List<VisualFile> ListRemoteFiles(string dirname);
+        void ChangeLocalDir(string dirname);
         List<VisualFile> ListLocalFiles();
-        List<VisualFile> ListLocalFiles(string dirname);
+        void ChangeRemoteDir(string dirname);
         void Close();
         void CloseDataSocket(Socket dataSocket);
     }

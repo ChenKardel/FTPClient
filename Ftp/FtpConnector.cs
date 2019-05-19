@@ -21,7 +21,7 @@ using Ftp.@interface;
 
 namespace Ftp
 {
-    public class FtpConnector: IConnector
+    public class FtpConnector : IConnector
     {
         #region variables;
         public string Username { get; set; }
@@ -38,10 +38,10 @@ namespace Ftp
 
         public enum FtpMode
         {
-            Passive, 
+            Passive,
             Port
         }
-        public FtpConnector(string hostname, string username="", string password="", int port =21, int timeout=2000)
+        public FtpConnector(string hostname, string username = "", string password = "", int port = 21, int timeout = 2000)
         {
             if (username.Equals("") && password.Equals(""))
             {
@@ -57,9 +57,9 @@ namespace Ftp
             Port = port;
             TimeOutLimit = timeout;
             //连接
-            
+
         }
-        
+
         public void Connect()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
@@ -89,12 +89,12 @@ namespace Ftp
         }
 
         //指定下载地址时
-        public bool Download(string remoteAddress,string localAddress)
+        public bool Download(string remoteAddress, string localAddress)
         {
             var dataSocket = GetDataSocket();
             Debug.WriteLine(Actions.Retr(remoteAddress));
             _controlSocket.Send(EncodingUtf8(Actions.Retr(remoteAddress)));
-           
+
             var waitReceive = WaitReceive(dataSocket);
             Debug.WriteLine(waitReceive);
             var statecode = WaitReceive(_controlSocket);
@@ -102,8 +102,8 @@ namespace Ftp
             if (File.Exists(localAddress))
                 File.Delete(localAddress);
             FileStream fs = new FileStream(localAddress, FileMode.Create);
-            byte[] data = System.Text.Encoding.Default.GetBytes(waitReceive );
-            if (data==null)
+            byte[] data = System.Text.Encoding.Default.GetBytes(waitReceive);
+            if (data == null)
             {
                 return false;
             }
@@ -111,7 +111,7 @@ namespace Ftp
             fs.Flush();
             fs.Close();
             //根据statecode判断是否成功
-            if (statecode.Substring(0,3).Equals("125"))
+            if (statecode.Substring(0, 3).Equals("125"))
             {
                 return true;
             }
@@ -125,7 +125,7 @@ namespace Ftp
         //默认下载目录为当前目录
         public bool Download(string remoteAddress)
         {
-           return Download(remoteAddress, ".");
+            return Download(remoteAddress, ".");
 
         }
 
@@ -173,8 +173,8 @@ namespace Ftp
         {
             var dataSocket = GetDataSocket();
             FileStream fs = new FileStream(localAddress, FileMode.Open);
-            byte[] data= new byte[0];
-            if (fs!=null)
+            byte[] data = new byte[0];
+            if (fs != null)
             {
                 BinaryReader r = new BinaryReader(fs);
                 r.BaseStream.Seek(0, SeekOrigin.Begin);    //将文件指针设置到文件开
@@ -186,7 +186,7 @@ namespace Ftp
             {
                 return false;
             }
-           
+
             dataSocket.Send(data);
             var waitReceive = WaitReceive(dataSocket);
 
@@ -216,14 +216,6 @@ namespace Ftp
             throw new NotImplementedException();
         }
 
-        public List<VisualFile> ListRemoteFiles(string dirname)
-        {
-            Debug.WriteLine(Actions.NList(dirname));
-            _controlSocket.Send(EncodingUtf8(Actions.NList(dirname)));
-            Debug.WriteLine(WaitReceive(_controlSocket));
-            
-            return null;
-        }
         public List<VisualFile> ListRemoteFiles()
         {
             var dataSocket = GetDataSocket();
@@ -236,10 +228,20 @@ namespace Ftp
             CloseDataSocket(dataSocket);
             return files.ToList();
         }
+       
+        public void ChangeLocalDir(string dirname)
+        {
+            throw new NotImplementedException();
+        }
 
         public List<VisualFile> ListLocalFiles()
         {
             return ListLocalFiles(".");
+        }
+
+        public void ChangeRemoteDir(string dirname)
+        {
+            throw new NotImplementedException();
         }
 
         public List<VisualFile> ListLocalFiles(string dirname)
@@ -278,19 +280,19 @@ namespace Ftp
             string result = "";
             byte[] buffer = new byte[bufferSize];
             int bytes = 0;
-            while(socket.Available > 0)
+            while (socket.Available > 0)
             {
                 bytes = socket.Receive(buffer, bufferSize, 0);
                 result += Encoding.UTF8.GetString(buffer, 0, bytes);
 
-            } 
+            }
             return result;
         }
         /// <summary>
         /// 进行数据响应等待
         /// </summary>
         /// <param name="millSeconds">等待时间</param>
-        private static void Wait(int millSeconds=20)
+        private static void Wait(int millSeconds = 20)
         {
             Thread.Sleep(TimeSpan.FromMilliseconds(millSeconds));
         }
@@ -299,7 +301,7 @@ namespace Ftp
         /// </summary>
         /// <param name="socket">等待socket</param>
         /// <param name="timeout">极限等到时间</param>
-        private static void Wait(Socket socket, int timeout=5000)
+        private static void Wait(Socket socket, int timeout = 5000)
         {
             int t = 20;
             while (socket.Available == 0 && timeout > 0)

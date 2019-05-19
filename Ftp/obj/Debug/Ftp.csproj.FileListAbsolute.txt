@@ -15,3 +15,4 @@ C:\Users\11145\source\repos\Ftp\Ftp\obj\Debug\Ftp.csproj.CoreCompileInputs.cache
 C:\Users\11145\source\repos\Ftp\Ftp\obj\Debug\Ftp.csproj.CopyComplete
 C:\Users\11145\source\repos\Ftp\Ftp\obj\Debug\Ftp.dll
 C:\Users\11145\source\repos\Ftp\Ftp\obj\Debug\Ftp.pdb
+C:\Users\11145\source\repos\Ftp\Ftp\obj\Debug\Ftp.csprojAssemblyReference.cache

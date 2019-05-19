@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Ftp.@enum
 {
-    static class Actions
+    public static class Actions
     {
         public static string Abort()
         {
@@ -52,12 +52,17 @@ namespace Ftp.@enum
         {
             return "LIST " + name + "\r\n";
         }
+
+        public static string ListAll()
+        {
+            return "LIST " + "-AL" + "\r\n";
+        }
    public static string List()
         {
             return "LIST\r\n";
         }
 
-        internal enum ModeType
+   public enum ModeType
         {
             Stream, Block, Compressed
         }
@@ -81,7 +86,7 @@ namespace Ftp.@enum
             return "MKD " + directory + "\r\n";
         }
 
-        public static string NList(string directory)
+        public static string NList(string directory, string localFilename)
         {
             return "NLST " + directory + "\r\n";
         }
@@ -110,7 +115,7 @@ namespace Ftp.@enum
         {
             return "PWD" + "\r\n";
         }
-
+        
         public static string Quit()
         {
             return "QUIT" + "\r\n";
@@ -174,7 +179,7 @@ namespace Ftp.@enum
             return "RETR " + filename + "\r\n";
         }
 
-        internal enum StructType
+        public enum StructType
         {
             File, Record, Page
         }
@@ -198,7 +203,7 @@ namespace Ftp.@enum
             return "SYST" + "\r\n";
         }
 
-        internal enum DataType
+        public enum DataType
         {
             Ascii, Ebcdic, Binary
         }
