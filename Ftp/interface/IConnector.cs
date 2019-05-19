@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using Ftp.entity;
 
 namespace Ftp.@interface
 {
+
+    public delegate void LogDelegate(Log log);
     public interface IConnector
     {
         void Connect();
@@ -21,5 +24,7 @@ namespace Ftp.@interface
         void ChangeRemoteDir(string dirname);
         void Close();
         void CloseDataSocket(Socket dataSocket);
+        event LogDelegate LogEvent;
+        string GetPwd();
     }
 }

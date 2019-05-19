@@ -39,14 +39,22 @@ namespace Ftp.@interface
             Bytes = bytes;
         }
 
-        public VisualFile(FileInfo fileInfo, FType fType)
+        public VisualFile(FileInfo fileInfo)
         {
             Filename = fileInfo.Name;
             Time = fileInfo.LastWriteTime;
             Bytes = fileInfo.Length;
-            FileType = fType;
+            FileType = FType.NormalFile;
         }
-    
+
+        public VisualFile(DirectoryInfo dirInfo)
+        {
+            Filename = dirInfo.Name;
+            Time = dirInfo.LastWriteTime;
+            Bytes = 0;
+            FileType = FType.Directory;
+        }
+
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

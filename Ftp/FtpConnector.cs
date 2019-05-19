@@ -33,8 +33,11 @@ namespace Ftp
         private bool _isAnonymous = false;
         public bool IsConnected { get; } = false;
         public FtpMode Mode { get; set; } = FtpMode.Passive;
+        public string LocalPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        public string RemotePath = "/";
         #endregion
         #region PublicFunction
+        public event LogDelegate LogEvent;
 
         public enum FtpMode
         {
@@ -221,9 +224,13 @@ namespace Ftp
             var dataSocket = GetDataSocket();
             Debug.WriteLine(Actions.List());
             _controlSocket.Send(EncodingUtf8(Actions.List()));
-            Debug.WriteLine(WaitReceive(_controlSocket));
+            var controlBuf = WaitReceive(_controlSocket);
             var waitReceive = WaitReceive(dataSocket);
             Debug.WriteLine(waitReceive);
+            if (ReadCode(controlBuf) == StateCode.DataConnectionOpen125)
+            {
+                LogEvent?.Invoke(new Log("成功列出远端文件"));
+            }
             var files = VisualFileConverter.ConvertTextToVisualFiles(waitReceive);
             CloseDataSocket(dataSocket);
             return files.ToList();
@@ -231,31 +238,65 @@ namespace Ftp
        
         public void ChangeLocalDir(string dirname)
         {
-            throw new NotImplementedException();
+            LocalPath = ChangeDir(LocalPath, dirname, '\\');
         }
 
-        public List<VisualFile> ListLocalFiles()
+        public string GetPwd()
         {
-            return ListLocalFiles(".");
+            _controlSocket.Send(EncodingUtf8(Actions.Pwd()));
+            return WaitReceive(_controlSocket);
         }
 
         public void ChangeRemoteDir(string dirname)
         {
+            RemotePath = ChangeDir(RemotePath, dirname);
             _controlSocket.Send(EncodingUtf8(Actions.ChangeCwd(dirname)));
             var waitReceive = WaitReceive(_controlSocket);
             Debug.WriteLine(waitReceive);
-            if (ReadCode(waitReceive) != StateCode.ChangeDir250)
+            if (ReadCode(waitReceive) == StateCode.ChangeDir250)
+            { 
+                LogEvent?.Invoke(new Log("成功切换文件夹"));
+            }
+
+            if (ReadCode(waitReceive) == StateCode.NoSuchFileDirectory550)
             {
-                
+                LogEvent?.Invoke(new Log("不存在当前文件夹", LogType.Err));
             }
         }
 
-        public List<VisualFile> ListLocalFiles(string dirname)
+        public string ChangeDir(string path, string newDir, char seperator = '/')
         {
-            var normalFiles = Directory.GetFiles(dirname).
-                Select((s => new VisualFile(new FileInfo(s), VisualFile.FType.NormalFile)));
-            var directories = Directory.GetDirectories(dirname)
-                .Select((s => new VisualFile(new FileInfo(s), VisualFile.FType.Directory)));
+            if (path != "/")
+            {
+                if (newDir == "..")
+                {
+                    var lastIndexOf = path.LastIndexOf(seperator);
+                    return path.Substring(0, lastIndexOf);
+                }
+                else
+                {
+                    return path + seperator + newDir;
+                }
+            }
+            else
+            {
+                if (newDir == "..")
+                {
+                    throw new Exception("Where you want to change?");
+                }
+                else
+                {
+                    return path + newDir;
+                }
+            }
+        }
+
+        public List<VisualFile> ListLocalFiles()
+        {
+            var normalFiles = Directory.GetFiles(LocalPath).
+                Select((s => new VisualFile(new FileInfo(s))));
+            var directories = Directory.GetDirectories(LocalPath)
+                .Select((s => new VisualFile(new DirectoryInfo(s))));
             return normalFiles.Concat(directories).ToList();
         }
 
@@ -272,6 +313,7 @@ namespace Ftp
                 dataSocket.Close();
             }
         }
+
 
         #endregion
         #region privateFunction

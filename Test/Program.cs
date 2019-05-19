@@ -21,7 +21,10 @@ namespace Test
             {
                 Debug.WriteLine(remoteFile);
             }
-            ftpConnector1.ChangeRemoteDir("f");
+            Debug.WriteLine(ftpConnector1.GetPwd());
+
+            ftpConnector1.ChangeRemoteDir("ff");
+            Debug.WriteLine(ftpConnector1.GetPwd());
         }
     }
 }
