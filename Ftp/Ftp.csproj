@@ -49,6 +49,7 @@
     <Compile Include="enum\Actions.cs" />
     <Compile Include="enum\SateCodeController.cs" />
     <Compile Include="enum\StateCode.cs" />
+    <Compile Include="except\ConnectionException.cs" />
     <Compile Include="FtpConnector.cs" />
     <Compile Include="interface\IConnector.cs" />
     <Compile Include="entity\VisualFile.cs" />

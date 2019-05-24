@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ftp.entity;
 using Ftp.@enum;
+using Ftp.except;
 using Ftp.@interface;
 //using Action = System.Action;
 
@@ -64,7 +65,7 @@ namespace Ftp
         public int TimeOutLimit { get; set; }
         private Socket _controlSocket;
         private bool _isAnonymous = false;
-        public bool IsConnected { get; } = false;
+        public bool IsConnected { get; set; }
         public FtpMode Mode { get; set; } = FtpMode.Passive;
         public string LocalPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         public string RemotePath = "/";
@@ -87,6 +88,7 @@ namespace Ftp
             Hostname = hostname;
             Port = port;
             TimeOutLimit = timeout;
+            IsConnected = false;
         }
 
        
@@ -105,6 +107,7 @@ namespace Ftp
             {
                 socket.Connect(ipAddress, Port);
                 LogEvent?.Invoke(new Log("成功连接FTP服务器"));
+                
             }
             catch (SocketException)
             {
@@ -134,11 +137,16 @@ namespace Ftp
                 throw new NotImplementedException();
             }
 
+            IsConnected = true;
         }
 
         //指定下载地址时
         public bool Download(string remoteAddress, string localAddress)
         {
+            if (!IsConnected)
+            {
+                return false;
+            }
             var dataSocket = GetDataSocket();
             Debug.WriteLine(Actions.Retr(remoteAddress));
             _controlSocket.Send(EncodingUtf8(Actions.Retr(remoteAddress)));
@@ -179,6 +187,10 @@ namespace Ftp
 
         public Socket GetDataSocket()
         {
+            if (!IsConnected)
+            {
+                return null;
+            }
             //被动模式连接
             if (Mode == FtpMode.Passive)
             {
@@ -220,7 +232,12 @@ namespace Ftp
 
         public bool Upload(string remoteAddress, string localAddress)
         {
+            
             var dataSocket = GetDataSocket();
+            if (dataSocket == null)
+            {
+                return false;
+            }
             FileStream fs = new FileStream(localAddress, FileMode.Open);
             byte[] data = new byte[0];
             if (fs != null)
@@ -268,6 +285,10 @@ namespace Ftp
         public List<VisualFile> ListRemoteFiles()
         {
             var dataSocket = GetDataSocket();
+            if (dataSocket == null)
+            {
+                return null;
+            }
             Debug.WriteLine(Actions.List());
             _controlSocket.Send(EncodingUtf8(Actions.List()));
             var controlBuf = WaitReceive(_controlSocket);
@@ -295,6 +316,10 @@ namespace Ftp
 
         public void ChangeRemoteDir(string dirname)
         {
+            if (!IsConnected)
+            {
+                throw new ConnectionException();
+            }
             RemotePath = ChangeDir(RemotePath, dirname);
             _controlSocket.Send(EncodingUtf8(Actions.ChangeCwd(dirname)));
             var waitReceive = WaitReceive(_controlSocket);
